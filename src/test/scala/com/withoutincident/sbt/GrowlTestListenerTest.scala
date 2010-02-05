@@ -13,7 +13,6 @@ object GrowlTestListenerTestSpecs extends Specification {
 
   "GrowlTestListener" should {
     "something" in {
-      "hi" should be ("hi")
     }
   }
 }
