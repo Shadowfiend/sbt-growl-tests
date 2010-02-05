@@ -36,9 +36,6 @@ class GrowlTestListener extends TestsListener {
 
   /** called if test completed */
   def endGroup(name:String, result:Result.Value) = {
-    result match {
-      case Result.Error => numErrored += 1
-    }
   }
 
   /** called once, at end. */
