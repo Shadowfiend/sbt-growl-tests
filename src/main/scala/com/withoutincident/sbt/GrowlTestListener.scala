@@ -1,5 +1,6 @@
 package com.withoutincident.sbt {
 
+import org.scalatools.testing.{Result => TResult}
 import _root_.sbt._
 
 class GrowlTestListener extends TestsListener {
@@ -7,6 +8,8 @@ class GrowlTestListener extends TestsListener {
   private var numPassed = 0
   private var numFailed = 0
   private var numErrored = 0
+  private var numSkipped = 0
+
   private var logger = new ConsoleLogger
 
   /** called once, at beginning. */
@@ -14,6 +17,7 @@ class GrowlTestListener extends TestsListener {
     numPassed = 0
     numFailed = 0
     numErrored = 0
+    numSkipped = 0
   }
 
   /** called for each class or equivalent grouping */
@@ -22,10 +26,13 @@ class GrowlTestListener extends TestsListener {
 
   /** called for each test method or equivalent */
   def testEvent(event:TestEvent) = {
-    event.result.get match {
-      case Result.Error => numErrored += 1
-      case Result.Failed => numFailed += 1
-      case Result.Passed => numPassed += 1
+    event.detail.foreach { evt =>
+      evt.result match {
+        case TResult.Error => numErrored +=1
+        case TResult.Success => numPassed +=1 
+        case TResult.Failure => numFailed +=1 
+        case TResult.Skipped => numSkipped += 1
+      }
     }
   }
 
@@ -58,8 +65,9 @@ class GrowlTestListener extends TestsListener {
       case _ => "errors"
     }
 
-    reportMessage(total + " " + testString + " FAILED.",
+    reportMessage(total + " " + testString + ": Suite FAILED.",
                   numPassed + " passed, " +
+                  numSkipped + " skipped, " + 
                   numFailed + " failed, " +
                   numErrored + " " + errorString + ".")
   }
@@ -71,7 +79,8 @@ class GrowlTestListener extends TestsListener {
       case _ => "tests"
     }
     
-    reportMessage(total + " " + testString + " PASSED.")
+    reportMessage(total + " " + testString + " PASSED.",
+                  "Skipped " + numSkipped + ".")
   }
 
   private def reportMessage(title:String):Unit = reportMessage(title, "")
